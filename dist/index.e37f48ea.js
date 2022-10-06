@@ -550,12 +550,13 @@ const showRecipe = async function() {
         (0, _recipeViewDefault.default).render(_model.state.recipe);
     } catch (err) {
         console.log(err.message);
+        (0, _recipeViewDefault.default).renderError(err.message);
     }
 };
-[
-    "hashChange",
-    "load"
-].forEach((event)=>window.addEventListener(event, showRecipe));
+const init = function() {
+    (0, _recipeViewDefault.default).addHandleRender(showRecipe);
+};
+init();
 
 },{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./model":"Y4A21","./views/recipeView":"l60JC"}],"gkKU3":[function(require,module,exports) {
 exports.interopDefault = function(a) {
@@ -613,7 +614,7 @@ const loadRecipe = async function(id) {
             ingredients: recipe.ingredients
         };
     } catch (err) {
-        console.log(err.message);
+        throw err;
     }
 };
 
@@ -1228,6 +1229,8 @@ var _fractional = require("fractional");
 class RecipeView {
     #parentElement = document.querySelector(".recipe");
     #data;
+    #errorMessage = "We could not find that recipe. Please try another one!";
+    #message = "";
     render(data) {
         this.#data = data;
         const markup = this.#generateMarkup();
@@ -1244,6 +1247,40 @@ class RecipeView {
   `;
         this.#clear;
         this.#parentElement.insertAdjacentHTML("afterbegin", markup);
+    }
+    renderError(message = this.#errorMessage) {
+        const markup = `
+    <div class="error">
+      <div>
+        <svg>
+          <use href="${(0, _iconsSvgDefault.default)}#icon-alert-triangle"></use>
+        </svg>
+      </div>
+      <p>${message}</p>
+    </div>
+    `;
+        this.#clear();
+        this.#parentElement.insertAdjacentHTML("afterbegin", markup);
+    }
+    renderMessage(message) {
+        const markup = `
+    <div class="message">
+      <div>
+        <svg>
+          <use href="${(0, _iconsSvgDefault.default)}#icon-smile"></use>
+        </svg>
+      </div>
+      <p>${message}</p>
+    </div>
+    `;
+        this.#clear();
+        this.#parentElement.insertAdjacentHTML("afterbegin", markup);
+    }
+    addHandleRender(handlerFunction) {
+        [
+            "hashchange",
+            "load"
+        ].forEach((event)=>window.addEventListener(event, handlerFunction));
     }
      #clear() {
         this.#parentElement.innerHTML = "";
